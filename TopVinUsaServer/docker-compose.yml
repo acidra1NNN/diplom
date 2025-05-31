@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:15
+    container_name: topvinusa-postgres
+    restart: always
+    ports:
+      - "5000:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: topvinusa
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth_service:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile
+    container_name: auth_service
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_CONN=host=db port=5432 user=postgres password=postgres dbname=topvinusa sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+
+  search_service:
+    build:
+      context: ./search_service
+      dockerfile: Dockerfile
+    container_name: search_service
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

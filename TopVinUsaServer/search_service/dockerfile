@@ -1,0 +1,19 @@
+FROM golang:1.24.3-alpine
+
+WORKDIR /app/search_service
+
+# Копируем только go.mod и go.sum
+COPY go.mod go.sum ./
+
+# Скачиваем зависимости
+RUN go mod download
+
+# Копируем весь исходный код
+COPY . .
+
+# Собираем приложение
+RUN go build -o search_service .
+
+EXPOSE 8081
+
+CMD ["./search_service"]

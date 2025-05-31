@@ -1,0 +1,24 @@
+FROM golang:1.24.3-alpine
+
+WORKDIR /app/auth_service
+
+# Копируем go.mod и go.sum
+COPY go.mod go.sum ./
+
+# Скачиваем зависимости
+RUN go mod download
+
+# Создаем структуру директорий
+RUN mkdir -p handlers model
+
+# Копируем код по директориям
+COPY handlers/ handlers/
+COPY model/ model/
+COPY main.go .
+
+# Собираем приложение
+RUN go build -o auth_service .
+
+EXPOSE 8080
+
+CMD ["./auth_service"]

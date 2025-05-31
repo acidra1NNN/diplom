@@ -1,0 +1,34 @@
+import SwiftUI
+struct ResultView: View {
+    let info: CarInfo
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Результаты VIN")
+                .font(.title2)
+
+            Form {
+                HStack {
+                    Text("Марка")
+                    Spacer()
+                    Text(info.make)
+                }
+                HStack {
+                    Text("Модель")
+                    Spacer()
+                    Text(info.model)
+                }
+                HStack {
+                    Text("Год выпуска")
+                    Spacer()
+                    Text(info.year)
+                }
+            }
+
+            Spacer()
+        }
+        .padding()
+        .navigationTitle("Информация")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
