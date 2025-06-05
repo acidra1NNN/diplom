@@ -52,13 +52,19 @@ func SearchCarInfo(w http.ResponseWriter, r *http.Request) {
 	for _, item := range results {
 		entry := item.(map[string]interface{})
 		if entry["Variable"] == "Make" {
-			make = entry["Value"].(string)
+			if v, ok := entry["Value"].(string); ok && v != "" && v != "null" {
+				make = v
+			}
 		}
 		if entry["Variable"] == "Model" {
-			model = entry["Value"].(string)
+			if v, ok := entry["Value"].(string); ok && v != "" && v != "null" {
+				model = v
+			}
 		}
 		if entry["Variable"] == "Model Year" {
-			year = entry["Value"].(string)
+			if v, ok := entry["Value"].(string); ok && v != "" && v != "null" {
+				year = v
+			}
 		}
 	}
 

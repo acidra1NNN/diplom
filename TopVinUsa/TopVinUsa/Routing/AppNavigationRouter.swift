@@ -4,6 +4,10 @@ enum AppRoute: Hashable {
     case welcome
     case authorization
     case registration
+    case search
+    case menu
+    case history
+    
 }
 
 final class AppNavigationRouter: ObservableObject {

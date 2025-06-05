@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct RegistrationPageView: View {
+    @EnvironmentObject var router: AppNavigationRouter
     @StateObject private var viewModel = RegistrationPageViewModel()
 
     var body: some View {
@@ -8,6 +9,9 @@ struct RegistrationPageView: View {
             Text("Регистрация")
                 .font(.largeTitle)
                 .bold()
+
+            TextField("Имя пользователя", text: $viewModel.username)
+                .textFieldStyle(.roundedBorder)
 
             TextField("Email", text: $viewModel.email)
                 .textFieldStyle(.roundedBorder)
@@ -20,10 +24,13 @@ struct RegistrationPageView: View {
             }
 
             Button("Зарегистрироваться") {
-                viewModel.login()
+                viewModel.register(router: router)
             }
             .disabled(viewModel.isLoading)
         }
         .padding()
+        .alert(isPresented: $viewModel.showAlert) {
+            Alert(title: Text("Ошибка"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("Ок")))
+        }
     }
 }

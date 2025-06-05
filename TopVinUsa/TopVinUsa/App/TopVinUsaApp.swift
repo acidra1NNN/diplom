@@ -16,6 +16,13 @@ struct TopVinUsaApp: App {
                             RegistrationPageView()
                         case .welcome:
                             WelcomePageView()
+                        case .search:
+                            SearchPageView()
+                        case .history:
+                            UserHistoryPageView()
+                        case .menu:
+                            MenuPageView()
+                        
                         }
                     }
             }

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct AuthorizationPageView: View {
+    @EnvironmentObject var router: AppNavigationRouter
     @StateObject private var viewModel = AuthorizationPageViewModel()
 
     var body: some View {
@@ -20,10 +21,13 @@ struct AuthorizationPageView: View {
             }
 
             Button("Войти") {
-                viewModel.login()
+                viewModel.login(router: router)
             }
             .disabled(viewModel.isLoading)
         }
         .padding()
+        .alert(isPresented: $viewModel.showAlert) {
+            Alert(title: Text("Ошибка"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("Ок")))
+        }
     }
 }

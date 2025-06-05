@@ -23,6 +23,21 @@ struct ResultView: View {
                     Spacer()
                     Text(info.year)
                 }
+                HStack {
+                    Text("Copart найден")
+                    Spacer()
+                    Text(info.foundOnCopart ? "Да" : "Нет")
+                }
+                HStack {
+                    Text("Повреждения")
+                    Spacer()
+                    Text(info.damage)
+                }
+                HStack {
+                    Text("Состояние")
+                    Spacer()
+                    Text(info.runsDrives)
+                }
             }
 
             Spacer()
