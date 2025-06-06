@@ -36,6 +36,8 @@ class SearchPageViewModel: ObservableObject {
                         completion(nil)
                     } else {
                         self?.foundCar = car
+                        // ВАЖНО: вызови addHistory здесь!
+                        self?.addHistory(userId: 1, car: car) // <-- подставь реальный userId
                         completion(car)
                     }
                 case .failure:
@@ -45,5 +47,21 @@ class SearchPageViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    func addHistory(userId: Int, car: CarInfo) {
+        guard let url = URL(string: "http://localhost:8082/add") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = [
+            "user_id": userId,
+            "vin": car.vin,
+            "make": car.make,
+            "model": car.model,
+            "year": car.year
+        ]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        URLSession.shared.dataTask(with: request).resume()
     }
 }

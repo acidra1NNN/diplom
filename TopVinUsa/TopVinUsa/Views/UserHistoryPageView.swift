@@ -2,6 +2,8 @@ import SwiftUI
 
 struct UserHistoryPageView: View {
     @StateObject private var viewModel = UserHistoryPageViewModel()
+    // Получи userId из своего AuthService или UserDefaults
+    let userId: Int = 1 // <-- временно, потом подставь реальный id
 
     var body: some View {
         VStack {
@@ -21,7 +23,7 @@ struct UserHistoryPageView: View {
             }
         }
         .onAppear {
-            viewModel.loadHistory()
+            viewModel.loadHistory(userId: userId)
         }
     }
 }

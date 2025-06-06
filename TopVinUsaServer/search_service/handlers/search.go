@@ -13,12 +13,13 @@ type SearchRequest struct {
 }
 
 type SearchResult struct {
-	Make       string `json:"make"`
-	Model      string `json:"model"`
-	Year       string `json:"year"`
+	VIN           string `json:"vin"`
+	Make          string `json:"make"`
+	Model         string `json:"model"`
+	Year          string `json:"year"`
 	FoundOnCopart bool   `json:"found_on_copart"`
-	Damage     string `json:"damage"`
-	RunsDrives string `json:"runs_drives"`
+	Damage        string `json:"damage"`
+	RunsDrives    string `json:"runs_drives"`
 }
 
 func SearchCarInfo(w http.ResponseWriter, r *http.Request) {
@@ -98,12 +99,13 @@ func SearchCarInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := SearchResult{
-		Make:       make,
-		Model:      model,
-		Year:       year,
+		VIN:           vin,
+		Make:          make,
+		Model:         model,
+		Year:          year,
 		FoundOnCopart: found,
-		Damage:     damage,
-		RunsDrives: runsDrives,
+		Damage:        damage,
+		RunsDrives:    runsDrives,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

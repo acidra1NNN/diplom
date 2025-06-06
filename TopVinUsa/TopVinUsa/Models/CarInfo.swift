@@ -7,8 +7,9 @@ struct CarInfo: Decodable {
     let foundOnCopart: Bool
     let damage: String
     let runsDrives: String
+    let vin: String
 
     enum CodingKeys: String, CodingKey {
-        case make, model, year, foundOnCopart = "found_on_copart", damage, runsDrives = "runs_drives"
+        case make, model, year, foundOnCopart = "found_on_copart", damage, runsDrives = "runs_drives", vin
     }
 }
