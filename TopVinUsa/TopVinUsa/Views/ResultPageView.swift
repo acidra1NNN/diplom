@@ -4,8 +4,15 @@ struct ResultView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Text("Результаты VIN")
-                .font(.title2)
+            VStack(spacing: 8) {
+                Text("Результаты поиска")
+                    .font(.title2)
+                    .bold()
+                Text(info.vin)
+                    .font(.title3)
+                    .foregroundColor(.gray)
+            }
+            .padding(.bottom, 8)
 
             Form {
                 HStack {
@@ -37,6 +44,34 @@ struct ResultView: View {
                     Text("Состояние")
                     Spacer()
                     Text(info.runsDrives)
+                }
+
+                Section {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(info.servicePartner)
+                            .font(.headline)
+                        Text("Чинить машину тут")
+                            .foregroundColor(.gray)
+                        Button("Перейти") {
+                            if let url = URL(string: "https://google.com") {
+                                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(info.partsPartner)
+                            .font(.headline)
+                        Text("Купить запчасти тут")
+                            .foregroundColor(.gray)
+                        Button("Перейти") {
+                            if let url = URL(string: "https://google.com") {
+                                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                    }
                 }
             }
 

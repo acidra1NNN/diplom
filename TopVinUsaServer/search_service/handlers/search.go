@@ -30,12 +30,8 @@ func SearchCarInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vin := strings.TrimSpace(req.VIN)
-	if len(vin) < 17 {
-		http.Error(w, "VIN too short", http.StatusBadRequest)
-		return
-	}
 
-	// 1. Get basic info from NHTSA
+	// Получаем базовую информацию от NHTSA
 	nhtsaURL := fmt.Sprintf("https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/%s?format=json", vin)
 	resp, err := http.Get(nhtsaURL)
 	if err != nil {
@@ -48,54 +44,52 @@ func SearchCarInfo(w http.ResponseWriter, r *http.Request) {
 	var nhtsaResp map[string]interface{}
 	json.Unmarshal(body, &nhtsaResp)
 
+	// Извлекаем данные из ответа NHTSA
 	results := nhtsaResp["Results"].([]interface{})
-	var make, model, year string
+	make := "Неизвестно"
+	model := "Неизвестно"
+	year := "Неизвестно"
+
 	for _, item := range results {
 		entry := item.(map[string]interface{})
-		if entry["Variable"] == "Make" {
-			if v, ok := entry["Value"].(string); ok && v != "" && v != "null" {
-				make = v
+		switch entry["Variable"] {
+		case "Make":
+			if value, ok := entry["Value"].(string); ok && value != "" {
+				make = value
 			}
-		}
-		if entry["Variable"] == "Model" {
-			if v, ok := entry["Value"].(string); ok && v != "" && v != "null" {
-				model = v
+		case "Model":
+			if value, ok := entry["Value"].(string); ok && value != "" {
+				model = value
 			}
-		}
-		if entry["Variable"] == "Model Year" {
-			if v, ok := entry["Value"].(string); ok && v != "" && v != "null" {
-				year = v
+		case "Model Year":
+			if value, ok := entry["Value"].(string); ok && value != "" {
+				year = value
 			}
 		}
 	}
 
-	// 2. Try search Copart (via PLC)
+	// Поиск на Copart
 	found := false
 	damage := "Нет данных"
 	runsDrives := "Нет данных"
 
-	searchURL := fmt.Sprintf("https://plc.auction/ru/auction/archive/copart?query=%s", vin)
-	resp2, err := http.Get(searchURL)
+	// Проверяем наличие на Copart
+	htmlStr, err := FetchCopartHTML(vin)
 	if err == nil {
-		defer resp2.Body.Close()
-		htmlData, _ := io.ReadAll(resp2.Body)
-		htmlStr := string(htmlData)
-
-		if strings.Contains(htmlStr, vin) {
+		// Проверяем наличие VIN на странице
+		if strings.Contains(strings.ToUpper(htmlStr), strings.ToUpper(vin)) {
 			found = true
-			if strings.Contains(htmlStr, "Runs & Drives") {
-				runsDrives = "Заводится и едет"
-			}
-			if strings.Contains(htmlStr, "Enhanced Vehicles") {
-				runsDrives = "Неизвестно (Enhanced)"
-			}
-			if strings.Contains(htmlStr, "Primary Damage") {
-				// Упрощённый парсинг
-				start := strings.Index(htmlStr, "Primary Damage")
-				sub := htmlStr[start : start+100]
-				damage = extractAfter(sub, "Primary Damage")
-			}
+			scrapeResult := ParseCopartHTML(htmlStr)
+			damage = scrapeResult.Damage
+			runsDrives = scrapeResult.RunsDrive
+
+			fmt.Printf("Found car: VIN=%s, Damage=%s, RunsDrive=%s\n",
+				vin, damage, runsDrives)
+		} else {
+			fmt.Printf("VIN %s not found in Copart results\n", vin)
 		}
+	} else {
+		fmt.Printf("Error fetching Copart data: %v\n", err)
 	}
 
 	result := SearchResult{

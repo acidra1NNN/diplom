@@ -1,19 +1,36 @@
 FROM golang:1.24.3-alpine
 
+# Установка Chrome и всех необходимых зависимостей
+RUN apk add --no-cache \
+    chromium \
+    chromium-chromedriver \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    udev \
+    xvfb \
+    dbus
+
+# Установка переменных окружения
+ENV CHROME_BIN=/usr/bin/chromium-browser \
+    CHROME_PATH=/usr/lib/chromium/ \
+    CHROMEDP_NO_SANDBOX=true \
+    CHROMEDP_DISABLE_GPU=true \
+    DISPLAY=:99
+
 WORKDIR /app/search_service
 
-# Копируем только go.mod и go.sum
+# Копируем и собираем приложение
 COPY go.mod go.sum ./
-
-# Скачиваем зависимости
 RUN go mod download
 
-# Копируем весь исходный код
 COPY . .
-
-# Собираем приложение
 RUN go build -o search_service .
 
 EXPOSE 8081
 
-CMD ["./search_service"]
+# Запускаем Xvfb перед основным приложением
+CMD Xvfb :99 & ./search_service

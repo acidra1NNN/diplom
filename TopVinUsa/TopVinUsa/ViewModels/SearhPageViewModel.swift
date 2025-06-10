@@ -9,15 +9,19 @@ class SearchPageViewModel: ObservableObject {
     @Published var foundCar: CarInfo? = nil
 
     func searchVIN(completion: @escaping (CarInfo?) -> Void) {
-        guard !vin.isEmpty else {
-            alertMessage = "Поле VIN не может быть пустым"
+        // Валидация длины
+        guard vin.count == 17 else {
+            alertMessage = "VIN номер должен содержать ровно 17 символов"
             showAlert = true
             completion(nil)
             return
         }
-
-        guard vin.count >= 17 else {
-            alertMessage = "VIN должен содержать минимум 17 символов"
+        
+        // Валидация символов VIN
+        let vinRegex = "^[A-HJ-NPR-Z0-9]{17}$"
+        let vinPredicate = NSPredicate(format: "SELF MATCHES %@", vinRegex)
+        guard vinPredicate.evaluate(with: vin) else {
+            alertMessage = "Недопустимые символы в VIN номере"
             showAlert = true
             completion(nil)
             return
@@ -36,13 +40,15 @@ class SearchPageViewModel: ObservableObject {
                         completion(nil)
                     } else {
                         self?.foundCar = car
-                        // ВАЖНО: вызови addHistory здесь!
-                        self?.addHistory(userId: 1, car: car) // <-- подставь реальный userId
+                        // Используем актуальный user_id
+                        if let userId = AuthService.shared.getCurrentUserID() {
+                            self?.addHistory(userId: userId, car: car)
+                        }
                         completion(car)
                     }
                 case .failure:
                     self?.alertMessage = "Данные по VIN не найдены"
-                    self?.showAlert = true
+                    self?.showAlert = true 
                     completion(nil)
                 }
             }
@@ -50,7 +56,8 @@ class SearchPageViewModel: ObservableObject {
     }
 
     func addHistory(userId: Int, car: CarInfo) {
-        guard let url = URL(string: "http://localhost:8082/add") else { return }
+        // Изменяем URL
+        guard let url = URL(string: "http://127.0.0.1:8082/add") else { return } // было "http://localhost:8082/add"
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

@@ -11,4 +11,17 @@ struct HistoryItem: Identifiable, Decodable {
     enum CodingKeys: String, CodingKey {
         case vin, make, model, year, searchedAt = "searched_at"
     }
+    
+    // Вспомогательный метод для конвертации в CarInfo
+    func toCarInfo() -> CarInfo {
+        return CarInfo(
+            vin: vin,
+            make: make,
+            model: model,
+            year: year,
+            foundOnCopart: false,
+            damage: "Нет данных",
+            runsDrives: "Нет данных"
+        )
+    }
 }

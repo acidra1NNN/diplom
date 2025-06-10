@@ -5,49 +5,84 @@ struct SearchPageView: View {
     @State private var showResult = false
 
     var body: some View {
-        VStack(spacing: 20) {
-            // Заголовок
-            HStack {
-                Image(systemName: "car.fill")
-                    .font(.title)
-                    .foregroundColor(.blue)
-                Text("TopVinUSA")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-            }
-            .padding(.top, 40)
+        ZStack {
+            VStack(spacing: 20) {
 
-            // Поле VIN
-            TextField("Введите VIN номер", text: $viewModel.vin)
-                .textInputAutocapitalization(.characters)
-                .disableAutocorrection(true)
-                .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
-                .padding(.horizontal)
+                HStack {
+                    Image("app-logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                    Text("TopVinUSA")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                }
+                .padding(.top, 40)
 
-            // Кнопка поиска
-            Button(action: {
-                viewModel.searchVIN { car in
-                    if car != nil {
-                        showResult = true
+                // Поле VIN
+                TextField("Введите VIN номер", text: $viewModel.vin)
+                    .textInputAutocapitalization(.characters)
+                    .disableAutocorrection(true)
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+                    .disabled(viewModel.isLoading)
+
+                // Кнопка поиска
+                Button(action: {
+                    viewModel.searchVIN { car in
+                        if car != nil {
+                            showResult = true
+                        }
+                    }
+                }) {
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .frame(width: 200, height: 50)
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    } else {
+                        Text("Найти")
+                            .foregroundColor(.white)
+                            .frame(width: 200, height: 50)
+                            .background(Color.blue)
+                            .cornerRadius(10)
                     }
                 }
-            }) {
-                if viewModel.isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .frame(width: 200, height: 50)
-                } else {
-                    Text("Найти")
-                        .foregroundColor(.white)
-                        .frame(width: 200, height: 50)
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                }
-            }
+                .disabled(viewModel.isLoading)
 
-            Spacer()
+                if viewModel.isLoading {
+                    VStack(spacing: 10) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .padding()
+                        Text("Поиск информации...")
+                            .foregroundColor(.gray)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.white.opacity(0.9))
+                }
+
+                Spacer()
+            }
+            .blur(radius: viewModel.isLoading ? 3 : 0)
+
+            if viewModel.isLoading {
+                Color.black.opacity(0.4)
+                    .edgesIgnoringSafeArea(.all)
+                    .overlay(
+                        VStack {
+                            ProgressView()
+                                .scaleEffect(2)
+                                .tint(.white)
+                            Text("Поиск информации...")
+                                .foregroundColor(.white)
+                                .padding(.top, 20)
+                        }
+                    )
+            }
         }
         .padding()
         .alert(isPresented: $viewModel.showAlert) {
@@ -56,8 +91,6 @@ struct SearchPageView: View {
         .navigationDestination(isPresented: $showResult) {
             if let car = viewModel.foundCar {
                 ResultView(info: car)
-            } else {
-                EmptyView()
             }
         }
     }

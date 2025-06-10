@@ -2,28 +2,45 @@ import SwiftUI
 
 struct UserHistoryPageView: View {
     @StateObject private var viewModel = UserHistoryPageViewModel()
-    // Получи userId из своего AuthService или UserDefaults
-    let userId: Int = 1 // <-- временно, потом подставь реальный id
-
+    @State private var selectedCar: CarInfo?
+    @State private var showingDetail = false
+    
     var body: some View {
         VStack {
             Text("История поиска")
                 .font(.largeTitle)
                 .bold()
+            
             List(viewModel.history) { item in
-                VStack(alignment: .leading) {
-                    Text("VIN: \(item.vin)")
-                    Text("Марка: \(item.make), Модель: \(item.model), Год: \(item.year)")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    Text("Дата: \(item.searchedAt)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                Button(action: {
+                    // Создаем CarInfo из HistoryItem
+                    selectedCar = CarInfo(
+                        vin: item.vin,
+                        make: item.make,
+                        model: item.model,
+                        year: item.year,
+                        foundOnCopart: false,
+                        damage: "Нет данных",
+                        runsDrives: "Нет данных"
+                    )
+                    showingDetail = true
+                }) {
+                    VStack(alignment: .leading) {
+                        Text("\(item.make) \(item.model) \(item.year)")
+                            .font(.headline)
+                    }
                 }
             }
         }
         .onAppear {
-            viewModel.loadHistory(userId: userId)
+            if let userId = AuthService.shared.getCurrentUserID() {
+                viewModel.loadHistory(userId: userId)
+            }
+        }
+        .navigationDestination(isPresented: $showingDetail) {
+            if let car = selectedCar {
+                ResultView(info: car)
+            }
         }
     }
 }
